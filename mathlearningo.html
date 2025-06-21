@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math Learning-o</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.1.5/dist/tesseract.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background:#f9f9f9; }
+  h1 { color: #2c3e50; }
+  #steps { border: 1px solid #ccc; background: white; padding: 15px; height: 200px; overflow-y: auto; margin-top: 15px; }
+  button, select, input, textarea { font-size: 1rem; margin: 5px 0; padding: 7px; }
+  #graph { margin-top: 20px; width: 100%; max-width: 600px; height: 400px; }
+  .error { color: red; }
+  .bold { font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Math Learning-o</h1>
+
+<label for="topic">Select Topic:</label><br/>
+<select id="topic" style="width: 300px;">
+  <option value="">-- Choose Topic --</option>
+  <option value="simpleInterest">Simple Interest</option>
+  <option value="compoundInterest">Compound Interest</option>
+  <option value="linearEquation">Linear Equation (1 variable)</option>
+  <option value="quadraticEquation">Quadratic Equation</option>
+  <option value="polynomials">Polynomials</option>
+  <option value="inequalities">Inequalities</option>
+  <option value="algebraicExpressions">Algebraic Expressions</option>
+  <option value="exponents">Exponents</option>
+  <option value="rationalNumbers">Rational Numbers</option>
+  <option value="squaresCubesRoots">Squares, Cubes & Roots</option>
+  <option value="integers">Integers</option>
+  <option value="fractions">Fractions</option>
+  <option value="decimals">Decimals</option>
+  <option value="probability">Probability</option>
+  <option value="percentage">Percentage</option>
+  <option value="perimeter">Perimeter</option>
+  <option value="area">Area</option>
+  <option value="volumeSurface">Volume & Surface Area</option>
+  <option value="geometryQA">Geometry Q&A</option>
+  <option value="graphing">Graphing (Plot functions)</option>
+</select><br/>
+
+<label for="question">Enter your math question:</label><br/>
+<textarea id="question" rows="4" cols="60" placeholder="Type your question or math expression here..."></textarea><br/>
+
+<label for="imageInput">Or upload a math problem image:</label><br/>
+<input type="file" id="imageInput" accept="image/*" /><br/>
+
+<button onclick="startVoiceInput()">🎤 Voice Input</button>
+<button onclick="solve()">Solve</button>
+<button onclick="clearOutput()">Clear</button>
+
+<div id="steps"></div>
+
+<div id="graph"></div>
+
+<script>
+// Utility to add step to output box
+function addStep(text, isFinal=false) {
+  const steps = document.getElementById('steps');
+  const p = document.createElement('p');
+  if(isFinal) p.classList.add('bold');
+  p.textContent = text;
+  steps.appendChild(p);
+  steps.scrollTop = steps.scrollHeight;
+}
+function clearOutput() {
+  document.getElementById('steps').innerHTML = '';
+  document.getElementById('graph').innerHTML = '';
+}
+
+// Image processing with Tesseract OCR
+document.getElementById('imageInput').addEventListener('change', (e) => {
+  clearOutput();
+  const file = e.target.files[0];
+  if(!file) return;
+  addStep('🖼️ Processing image…');
+  Tesseract.recognize(file, 'eng', {
+    logger: m => {
+      if(m.status === 'recognizing text') addStep('… OCR progress: ' + Math.round(m.progress * 100) + '%');
+    }
+  }).then(({ data: { text }}) => {
+    const cleanText = text.trim().replace(/\n/g, ' ');
+    document.getElementById('question').value = cleanText;
+    addStep('📝 OCR extracted text: ' + cleanText, true);
+  }).catch(err => addStep('OCR error: ' + err.message, true));
+});
+
+// Voice input using Web Speech API
+function startVoiceInput() {
+  if (!('webkitSpeechRecognition' in window)) {
+    alert('Speech Recognition not supported in this browser.');
+    return;
+  }
+  clearOutput();
+  addStep('🎙️ Listening... Speak now.');
+  const recognition = new webkitSpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.start();
+
+  recognition.onresult = (event) => {
+    const spokenText = event.results[0][0].transcript;
+    document.getElementById('question').value = spokenText;
+    addStep('🎙️ Recognized text: ' + spokenText, true);
+  };
+  recognition.onerror = (event) => {
+    addStep('Speech recognition error: ' + event.error, true);
+  };
+}
+
+// Main solver dispatcher
+function solve() {
+  clearOutput();
+  const topic = document.getElementById('topic').value;
+  const question = document.getElementById('question').value.trim();
+
+  if (!topic) return addStep('⚠️ Please select a topic.', true);
+  if (!question) return addStep('⚠️ Please enter or upload a question.', true);
+
+  try {
+    switch(topic) {
+      case 'simpleInterest': solveSimpleInterest(question); break;
+      case 'compoundInterest': solveCompoundInterest(question); break;
+      case 'linearEquation': solveLinearEquation(question); break;
+      case 'quadraticEquation': solveQuadraticEquation(question); break;
+      case 'polynomials': solvePolynomials(question); break;
+      case 'inequalities': solveInequalities(question); break;
+      case 'algebraicExpressions': solveAlgebraicExpressions(question); break;
+      case 'exponents': solveExponents(question); break;
+      case 'rationalNumbers': solveRationalNumbers(question); break;
+      case 'squaresCubesRoots': solveSquaresCubesRoots(question); break;
+      case 'integers': solveIntegers(question); break;
+      case 'fractions': solveFractions(question); break;
+      case 'decimals': solveDecimals(question); break;
+      case 'probability': solveProbability(question); break;
+      case 'percentage': solvePercentage(question); break;
+      case 'perimeter': solvePerimeter(question); break;
+      case 'area': solveArea(question); break;
+      case 'volumeSurface': solveVolumeSurface(question); break;
+      case 'geometryQA': solveGeometryQA(question); break;
+      case 'graphing': solveGraphing(question); break;
+      default:
+        addStep('⚠️ Solver not implemented for this topic yet.', true);
+    }
+  } catch (e) {
+    addStep('Error during solving: ' + e.message, true);
+    console.error(e);
+  }
+}
+
+// ====================
+// === SOLVER FUNCTIONS
+// ====================
+
+// SIMPLE INTEREST
+function solveSimpleInterest(q) {
+  const Pm = q.match(/P\s*=\s*([\d.]+)/i);
+  const Rm = q.match(/R\s*=\s*([\d.]+)/i);
+  const Tm = q.match(/T\s*=\s*([\d.]+)/i);
+  if(!Pm || !Rm || !Tm) return addStep("⚠️ Please provide P, R, and T in format: P=number R=number T=number", true);
+  const P = parseFloat(Pm[1]);
+  const R = parseFloat(Rm[1]);
+  const T = parseFloat(Tm[1]);
+  addStep(`Given: Principal (P) = ${P}, Rate (R) = ${R}%, Time (T) = ${T} years`);
+  const SI = (P * R * T) / 100;
+  addStep(`Simple Interest = (P × R × T) / 100 = (${P} × ${R} × ${T}) / 100 = ${SI}`, true);
+}
+
+// COMPOUND INTEREST
+function solveCompoundInterest(q) {
+  // Expected format: P=, R=, T=, n= (compounding frequency, default 1)
+  const Pm = q.match(/P\s*=\s*([\d.]+)/i);
+  const Rm = q.match(/R\s*=\s*([\d.]+)/i);
+  const Tm = q.match(/T\s*=\s*([\d.]+)/i);
+  const nm = q.match(/n\s*=\s*([\d.]+)/i);
+  if(!Pm || !Rm || !Tm) return addStep("⚠️ Please provide P, R, and T in format: P=number R=number T=number", true);
+  const P = parseFloat(Pm[1]);
+  const R = parseFloat(Rm[1]);
+  const T = parseFloat(Tm[1]);
+  const n = nm ? parseFloat(nm[1]) : 1;
+  addStep(`Given: Principal (P) = ${P}, Rate (R) = ${R}%, Time (T) = ${T} years, Compoundings per year (n) = ${n}`);
+  const A = P * Math.pow(1 + (R/(100*n)), n*T);
+  const CI = A - P;
+  addStep(`Amount A = P(1 + R/(100n))^{nT} = ${A.toFixed(2)}`);
+  addStep(`Compound Interest = A - P = ${CI.toFixed(2)}`, true);
+}
+
+// LINEAR EQUATION (one variable)
+function solveLinearEquation(q) {
+  // Try extracting expression like ax + b = c or similar
+  const m = q.match(/([-\d.x\s+]+)=\s*([-\d.x\s+]+)/);
+  if(!m) return addStep('⚠️ Enter linear equation like "3x + 2 = 11"', true);
+  const left = m[1].replace(/\s+/g,'');
+  const right = m[2].replace(/\s+/g,'');
+  try {
+    // use math.js or manual solving — here manual parsing for simple case
+    // Only handle form ax + b = c
+    const xMatch = left.match(/([-+]?\d*)x/);
+    if(!xMatch) return addStep('⚠️ Equation must have variable x.', true);
+    const a = xMatch[1]==='' || xMatch[1]==='+' ? 1 : xMatch[1]==='-' ? -1 : parseFloat(xMatch[1]);
+    // b term:
+    const bMatch = left.match(/([-+]\d+)/);
+    const b = bMatch ? parseFloat(bMatch[1]) : 0;
+    const c = parseFloat(right);
+    addStep(`Equation: ${a}x ${b>=0? '+ '+b : '- ' + (-b)} = ${c}`);
+    const x = (c - b)/a;
+    addStep(`Solve for x: x = ( ${c} - (${b}) ) / ${a} = ${x}`, true);
+  } catch(e) {
+    addStep('Error solving linear equation: ' + e.message, true);
+  }
+}
+
+// QUADRATIC EQUATION ax² + bx + c = 0
+function solveQuadraticEquation(q) {
+  // Extract a,b,c from something like 2x^2+3x+1=0
+  const eq = q.replace(/\s+/g, '').split('=')[0];
+  const aMatch = eq.match(/([+-]?\d*)x\^2/);
+  const bMatch = eq.match(/([+-]?\d*)x(?!\^)/);
+  const cMatch = eq.match(/([+-]?\d+)(?!x)/g);
+
+  let a = aMatch ? parseInt(aMatch[1] || '1') : 0;
+  let b = bMatch ? parseInt(bMatch[1] || '1') : 0;
+  let c = 0;
+  if(cMatch) {
+    cMatch.forEach(n => {
+      if(!n.includes('x')) c += parseInt(n);
+    });
+  }
+
+  if(a === 0) return addStep("⚠️ Not a quadratic equation (a=0).", true);
+
+  addStep(`Given quadratic equation: ${a}x² + ${b}x + ${c} = 0`);
+
+  const D = b*b - 4*a*c;
+  addStep(`Discriminant (D) = b² - 4ac = ${b}² - 4×${a}×${c} = ${D}`);
+
+  if(D < 0) {
+    addStep("No real roots since discriminant is negative.", true);
+  } else {
+    const root1 = ((-b + Math.sqrt(D)) / (2*a)).toFixed(4);
+    const root2 = ((-b - Math.sqrt(D)) / (2*a)).toFixed(4);
+    addStep(`Roots: x₁ = ${root1}, x₂ = ${root2}`, true);
+  }
+}
+
+// POLYNOMIALS - placeholder
+function solvePolynomials(q) {
+  addStep("Polynomial solving feature coming soon!", true);
+}
+
+// INEQUALITIES - placeholder
+function solveInequalities(q) {
+  addStep("Inequality solving feature coming soon!", true);
+}
+
+// ALGEBRAIC EXPRESSIONS - placeholder
+function solveAlgebraicExpressions(q) {
+  addStep("Algebraic expression simplification coming soon!", true);
+}
+
+// EXPONENTS - placeholder
+function solveExponents(q) {
+  addStep("Exponents topic coming soon!", true);
+}
+
+// RATIONAL NUMBERS - placeholder
+function solveRationalNumbers(q) {
+  addStep("Rational numbers topic coming soon!", true);
+}
+
+// SQUARES, CUBES, ROOTS - placeholder
+function solveSquaresCubesRoots(q) {
+  addStep("Squares, cubes and roots topic coming soon!", true);
+}
+
+// INTEGERS - placeholder
+function solveIntegers(q) {
+  addStep("Integers topic coming soon!", true);
+}
+
+// FRACTIONS - placeholder
+function solveFractions(q) {
+  addStep("Fractions topic coming soon!", true);
+}
+
+// DECIMALS - placeholder
+function solveDecimals(q) {
+  addStep("Decimals topic coming soon!", true);
+}
+
+// PROBABILITY - placeholder
+function solveProbability(q) {
+  addStep("Probability topic coming soon!", true);
+}
+
+// PERCENTAGE - placeholder
+function solvePercentage(q) {
+  addStep("Percentage topic coming soon!", true);
+}
+
+// PERIMETER - placeholder
+function solvePerimeter(q) {
+  addStep("Perimeter topic coming soon!", true);
+}
+
+// AREA - placeholder
+function solveArea(q) {
+  addStep("Area topic coming soon!", true);
+}
+
+// VOLUME & SURFACE - placeholder
+function solveVolumeSurface(q) {
+  addStep("Volume and surface area topic coming soon!", true);
+}
+
+// GEOMETRY Q&A
+function solveGeometryQA(q) {
+  addStep("Geometry Q&A feature:\n- Your question: " + q + "\n\n[Simulated AI Answer]\nFor detailed geometry solutions, AI backend integration needed.", true);
+}
+
+// GRAPHING (plot functions y = f(x))
+function solveGraphing(q) {
+  // Expect something like y=2x+3 or y=sin(x)
+  // Parse function of x on right side of =
+  const m = q.match(/y\s*=\s*(.+)/i);
+  if(!m) return addStep('⚠️ Enter function like "y=2x+3" to plot.', true);
+  const expr = m[1];
+  addStep('Plotting function: y = ' + expr);
+  // Very simple parser to replace x with values and eval
+  const xs = [];
+  const ys = [];
+  for(let x = -10; x <= 10; x += 0.5) {
+    xs.push(x);
+    try {
+      // Replace x with value, allow Math functions
+      const scope = {x};
+      // Allow Math functions by adding Math prefix:
+      const exprSafe = expr
+        .replace(/sin/g, 'Math.sin')
+        .replace(/cos/g, 'Math.cos')
+        .replace(/tan/g, 'Math.tan')
+        .replace(/sqrt/g, 'Math.sqrt')
+        .replace(/log/g, 'Math.log')
+        .replace(/abs/g, 'Math.abs')
+        .replace(/pow/g, 'Math.pow')
+        .replace(/exp/g, 'Math.exp');
+      // Use Function constructor to evaluate safely
+      const f = new Function('x', 'with(Math) { return ' + exprSafe + '; }');
+      const y = f(x);
+      ys.push(y);
+    } catch(e) {
+      ys.push(NaN);
+    }
+  }
+  Plotly.newPlot('graph', [{x: xs, y: ys, mode: 'lines', name: expr}], {margin: {t: 0}});
+}
+
+// ====================
+// END OF SOLVERS
+// ====================
+
+</script>
+</body>
+</html>
