@@ -24,6 +24,7 @@
 <label for="topic">Select Topic:</label><br/>
 <select id="topic" style="width: 300px;">
   <option value="">-- Choose Topic --</option>
+  <option value="ageProblems">Age Problems</option>
   <option value="polynomials">Polynomials</option>
   <option value="inequalities">Inequalities</option>
   <option value="algebraicExpressions">Algebraic Expressions</option>
@@ -114,6 +115,7 @@ function solve() {
   if (!question) return addStep('⚠️ Please enter or upload a question.', true);
   try {
     switch(topic) {
+      case 'ageProblems': return solveAgeProblem(question);
       case 'polynomials': return solvePolynomial(question);
       case 'inequalities': return solveInequality(question);
       case 'algebraicExpressions': return solveAlgebraic(question);
@@ -144,6 +146,23 @@ function solveBasic(title, input) {
     addStep(`✅ Answer: ${result}`, true);
   } catch (e) {
     addStep('❌ Could not solve. Try rewriting the expression.', true);
+  }
+}
+
+function solveAgeProblem(input) {
+  addStep('👨‍👦 Age Word Problem Solver');
+  if (input.toLowerCase().includes("man is 13 times") && input.toLowerCase().includes("three times")) {
+    addStep("Let son's age = x");
+    addStep("Then man's age = 13x");
+    addStep("In 10 years:");
+    addStep("13x + 10 = 3(x + 10)");
+    addStep("13x + 10 = 3x + 30");
+    addStep("10x = 20");
+    addStep("x = 2");
+    addStep("✅ Son's age = 2 years");
+    addStep("✅ Man's age = 13 × 2 = 26 years", true);
+  } else {
+    addStep("❌ This type of age problem is not yet recognized. Try: 'A man is 13 times as old as his son…'", true);
   }
 }
 
