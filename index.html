@@ -151,18 +151,37 @@ function solveBasic(title, input) {
 
 function solveAgeProblem(input) {
   addStep('👨‍👦 Age Word Problem Solver');
-  if (input.toLowerCase().includes("man is 13 times") && input.toLowerCase().includes("three times")) {
-    addStep("Let son's age = x");
-    addStep("Then man's age = 13x");
-    addStep("In 10 years:");
-    addStep("13x + 10 = 3(x + 10)");
-    addStep("13x + 10 = 3x + 30");
-    addStep("10x = 20");
-    addStep("x = 2");
-    addStep("✅ Son's age = 2 years");
-    addStep("✅ Man's age = 13 × 2 = 26 years", true);
+  const regex = /a man is (\d+) times (?:as )?old as his son.*?in (\d+) years.*?he will be (\d+) times (?:as )?old as his son/i;
+  const match = input.match(regex);
+
+  if (match) {
+    const factorNow = parseInt(match[1]);
+    const yearsLater = parseInt(match[2]);
+    const factorFuture = parseInt(match[3]);
+
+    addStep(`Let son's age = x`);
+    addStep(`Then man's age = ${factorNow}x`);
+
+    addStep(`In ${yearsLater} years:`);
+    addStep(`${factorNow}x + ${yearsLater} = ${factorFuture}(x + ${yearsLater})`);
+
+    const equationLeft = `${factorNow}x + ${yearsLater}`;
+    const equationRight = `${factorFuture}x + ${factorFuture * yearsLater}`;
+
+    addStep(`Equation: ${equationLeft} = ${equationRight}`);
+
+    const xNumerator = (factorFuture * yearsLater) - yearsLater;
+    const xDenominator = factorNow - factorFuture;
+    const x = xNumerator / xDenominator;
+
+    const manAge = factorNow * x;
+
+    addStep(`x = (${factorFuture} × ${yearsLater} - ${yearsLater}) / (${factorNow} - ${factorFuture})`);
+    addStep(`x = ${x}`);
+    addStep(`✅ Son's age = ${x} years`);
+    addStep(`✅ Man's age = ${manAge} years`, true);
   } else {
-    addStep("❌ This type of age problem is not yet recognized. Try: 'A man is 13 times as old as his son…'", true);
+    addStep("❌ This age problem format isn't recognized yet. Try: 'A man is 13 times as old as his son. In 10 years...'", true);
   }
 }
 
