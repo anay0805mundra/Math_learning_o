@@ -24,7 +24,7 @@
 <label for="topic">Select Topic:</label><br/>
 <select id="topic" style="width: 300px;">
   <option value="">-- Choose Topic --</option>
-  <option value="ageProblems">Age Problems</option>
+  <option value="SimpleIntrest">Simple Intrest </option>
   <option value="polynomials">Polynomials</option>
   <option value="inequalities">Inequalities</option>
   <option value="algebraicExpressions">Algebraic Expressions</option>
@@ -39,7 +39,9 @@
   <option value="perimeter">Perimeter</option>
   <option value="area">Area</option>
   <option value="volumeSurface">Volume & Surface Area</option>
-  <option value="geometryQA">Geometry Q&A</option>
+  <option value="geometry">Geometry </option>
+  <option value="CompoundIntrest">Compound Intrest </option>
+  <option value="MCQTEST">MCQ Test </option>
 </select><br/>
 
 <label for="question">Enter your math question:</label><br/>
@@ -115,7 +117,6 @@ function solve() {
   if (!question) return addStep('⚠️ Please enter or upload a question.', true);
   try {
     switch(topic) {
-      case 'ageProblems': return solveAgeProblem(question);
       case 'polynomials': return solvePolynomial(question);
       case 'inequalities': return solveInequality(question);
       case 'algebraicExpressions': return solveAlgebraic(question);
@@ -130,7 +131,10 @@ function solve() {
       case 'perimeter': return solveBasic("Perimeter", question);
       case 'area': return solveBasic("Area", question);
       case 'volumeSurface': return solveBasic("Volume & Surface Area", question);
-      case 'geometryQA': return solveGeometry(question);
+      case 'geometry': return solveGeometry(question);
+      case 'simpleintrest': return solveSimpleIntrest(question);
+      case 'geometry': return solveCompoundIntrest(question);
+      case 'MCQTEST': return solveMCQTEST(question);
       default:
         return addStep('❌ Unknown topic.', true);
     }
@@ -149,8 +153,34 @@ function solveBasic(title, input) {
   }
 }
 
-function solveAgeProblem(input) {
-  addStep('👨‍👦 Age Word Problem Solver');
+function solveAlgebra(q) {
+  addStep(`📘 Solving Algebraic Expression: ${q}`);
+  const expr = q.toLowerCase();
+
+  // Special Identity Detection
+  if (/\(.*\+.*\)\^2/.test(expr)) {
+    addStep('🧠 Identity Detected: (a + b)^2 = a^2 + 2ab + b^2');
+    return;
+  }
+  if (/\(.*-.*\)\^2/.test(expr)) {
+    addStep('🧠 Identity Detected: (a - b)^2 = a^2 - 2ab + b^2');
+    return;
+  }
+  if (/\(.*\+.*\)\(.*-.*\)/.test(expr)) {
+    addStep('🧠 Identity Detected: (a + b)(a - b) = a^2 - b^2');
+    return;
+  }
+
+  // Try direct simplification
+  if (/[\d\w\s+\-*/^=()]+/.test(expr)) {
+    try {
+      const simplified = math.simplify(expr).toString();
+      return addStep(`✅ Simplified Expression: ${simplified}`);
+    } catch {
+      // Let it fall through
+    }
+  }
+// Age based problems
   const regex = /a man is (\d+) times (?:as )?old as his son.*?in (\d+) years.*?he will be (\d+) times (?:as )?old as his son/i;
   const match = input.match(regex);
 
@@ -185,60 +215,1310 @@ function solveAgeProblem(input) {
   }
 }
 
-function solvePolynomial(input) {
-  addStep('🔍 Polynomial Solver');
-  addStep('Input: ' + input);
-  try {
-    const expr = math.simplify(input).toString();
-    const factored = math.factor(input).toString();
-    addStep('Simplified: ' + expr);
-    addStep('Factored: ' + factored, true);
-  } catch {
-    addStep('❌ Could not simplify/factor the polynomial.', true);
   }
+
+  // Monomial, binomial or polynomial arithmetic
+  if (expr.includes("+") || expr.includes("-") || expr.includes("*") || expr.includes("/")) {
+    try {
+      const simplified = math.simplify(expr);
+      return addStep(`✅ Simplified Algebraic Expression: ${simplified}`);
+    } catch (e) {
+      return addStep('❌ Invalid algebraic expression.');
+    }
+  }
+
+  addStep('📚 Try expressions like "2x + 3x - 4", or "a² + 2ab + b²", or "age problems like A is 3 years older than B".');
 }
 
-function solveInequality(input) {
-  addStep('🔍 Inequality Solver');
-  const match = input.match(/(.*)(<=|>=|<|>)(.*)/);
-  if (!match) return addStep('❌ Use format like x + 2 < 5', true);
-  try {
-    const lhs = math.simplify(match[1]).toString();
-    const rhs = math.evaluate(match[3]);
-    addStep(`Simplified: ${lhs} ${match[2]} ${rhs}`);
-    addStep(`Check: ${math.evaluate(lhs.replace(/x/g, 0))} ${match[2]} ${rhs}`, true);
-  } catch {
-    addStep('❌ Error in inequality solving.', true);
+  
+function solveSquares(q) {
+  addStep(`🧠 Solving Square, Cube & Root: ${q}`);
+  const numMatch = q.match(/(-?\d+(\.\d+)?)/);
+  if (!numMatch) return addStep('❌ No number found.');
+
+  const num = parseFloat(numMatch[1]);
+
+  if (/square root/i.test(q)) {
+    const root = Math.sqrt(num).toFixed(4);
+    return addStep(`√${num} = ${root}`);
   }
+
+  if (/cube root/i.test(q)) {
+    const root = Math.cbrt(num).toFixed(4);
+    return addStep(`∛${num} = ${root}`);
+  }
+
+  if (/square of/i.test(q)) {
+    const square = (num ** 2).toFixed(2);
+    return addStep(`${num}² = ${square}`);
+  }
+
+  if (/cube of/i.test(q)) {
+    const cube = (num ** 3).toFixed(2);
+    return addStep(`${num}³ = ${cube}`);
+  }
+
+  if (/perfect square/i.test(q)) {
+    const sqrt = Math.sqrt(num);
+    if (Number.isInteger(sqrt)) {
+      return addStep(`✅ ${num} is a perfect square. √${num} = ${sqrt}`);
+    } else {
+      const next = Math.ceil(sqrt) ** 2;
+      const diff = next - num;
+      return addStep(`❌ Not a perfect square. Add ${diff} to make it ${next}`);
+    }
+  }
+
+  if (/perfect cube/i.test(q)) {
+    const cbrt = Math.cbrt(num);
+    if (Number.isInteger(cbrt)) {
+      return addStep(`✅ ${num} is a perfect cube. ∛${num} = ${cbrt}`);
+    } else {
+      const next = Math.round(cbrt + 1) ** 3;
+      const diff = next - num;
+      return addStep(`❌ Not a perfect cube. Add ${diff} to make it ${next}`);
+    }
+  }
+
+  if (/smallest \d+-digit perfect square/.test(q)) {
+    const digits = parseInt(q.match(/smallest (\d+)-digit/)[1]);
+    const start = 10 ** (digits - 1);
+    const root = Math.ceil(Math.sqrt(start));
+    const square = root ** 2;
+    return addStep(`🟩 Smallest ${digits}-digit perfect square is ${square}`);
+  }
+
+  if (/add|subtract|multiply|divide/i.test(q) && /to make.*perfect (square|cube)/i.test(q)) {
+    const type = q.includes("square") ? "square" : "cube";
+    const base = type === "square" ? Math.ceil(Math.sqrt(num)) : Math.ceil(Math.cbrt(num));
+    const target = type === "square" ? base ** 2 : base ** 3;
+    const add = target - num;
+    const subtract = num - (type === "square" ? (base - 1) ** 2 : (base - 1) ** 3);
+    addStep(`${num} + ${add} = ${target} (make perfect ${type})`);
+    addStep(`${num} - ${subtract} = ${(type === "square" ? (base - 1) ** 2 : (base - 1) ** 3)} (make perfect ${type})`);
+    return;
+  }
+
+  addStep('📚 Use keywords like "square of", "cube root of", "perfect square", etc.');
+}
+function solveProfitLoss(q) {
+  addStep(`💰 Solving Profit & Loss Question: ${q}`);
+  q = q.toLowerCase();
+
+  const cpMatch = q.match(/cost price.*?(\d+(\.\d+)?)/);
+  const spMatch = q.match(/selling price.*?(\d+(\.\d+)?)/);
+
+  if (cpMatch && spMatch) {
+    const cp = parseFloat(cpMatch[1]);
+    const sp = parseFloat(spMatch[1]);
+    if (sp > cp) {
+      const profit = sp - cp;
+      const percent = ((profit / cp) * 100).toFixed(2);
+      return addStep(`✅ Profit = Rs.${profit}, Profit% = ${percent}%`);
+    } else if (cp > sp) {
+      const loss = cp - sp;
+      const percent = ((loss / cp) * 100).toFixed(2);
+      return addStep(`✅ Loss = Rs.${loss}, Loss% = ${percent}%`);
+    } else {
+      return addStep('⚖️ No Profit, No Loss.');
+    }
+  }
+
+  const percentMatch = q.match(/profit.*?(\d+)%|loss.*?(\d+)%/);
+  const type = q.includes("profit") ? "profit" : q.includes("loss") ? "loss" : null;
+  const cpOnly = q.match(/cost price.*?(\d+(\.\d+)?)/);
+
+  if (percentMatch && cpOnly) {
+    const percent = parseFloat(percentMatch[1] || percentMatch[2]);
+    const cp = parseFloat(cpOnly[1]);
+    const amount = (percent / 100) * cp;
+    const sp = type === "profit" ? cp + amount : cp - amount;
+    return addStep(`✅ ${type === "profit" ? 'SP = CP + Profit' : 'SP = CP - Loss'} = Rs.${sp}`);
+  }
+
+  addStep("📚 Try phrases like 'Cost price is 80, selling price is 100' or 'Profit is 20% on Rs. 500'");
+}
+let latestChartData = null; // Global chart data holder
+
+function solveDataHandling(q) {
+  addStep(`📊 Interpreting Data Handling Question: ${q}`);
+
+  // Supplementary question handling
+  if (latestChartData && /how many|which|total|most|least/i.test(q)) {
+    return handleChartQuestions(q);
+  }
+
+  // Detect chart type
+  if (/bar\s*graph/i.test(q)) return renderBarGraph(q);
+  if (/line\s*graph/i.test(q)) return renderLineGraph(q);
+  if (/pie\s*chart/i.test(q)) return renderPieChart(q);
+  if (/tally\s*marks?/i.test(q)) return renderTally(q);
+  if (/pictograph/i.test(q)) return renderPictograph(q);
+
+  addStep('📌 Please specify a chart type (e.g., "Draw a bar graph of Apples:10, Oranges:20")');
 }
 
-function solveAlgebraic(input) {
-  addStep('🔍 Algebraic Expression');
-  try {
-    const simplified = math.simplify(input).toString();
-    addStep('Simplified: ' + simplified, true);
-  } catch {
-    addStep('❌ Invalid algebraic expression.', true);
-  }
+// Parses data like "Apples:10, Oranges:20"
+function parseData(q) {
+  const match = q.match(/([a-zA-Z ]+):\s*(\d+)/g);
+  if (!match) return null;
+  const parsed = match.map(pair => {
+    const [label, value] = pair.split(':');
+    return { label: label.trim().toLowerCase(), value: parseInt(value.trim()) };
+  });
+  latestChartData = parsed;
+  return parsed;
 }
 
-function solveProbability(input) {
-  addStep('🎲 Probability Solver');
-  if (/coin/i.test(input)) {
-    addStep('Example: Probability of getting Head in 1 toss = 1/2', true);
-  } else if (/dice|die/i.test(input)) {
-    addStep('Example: Probability of getting 4 in a dice = 1/6', true);
-  } else if (/card/i.test(input)) {
-    addStep('Example: Probability of red card = 26/52 = 1/2', true);
+// Supplementary Q&A about charts
+function handleChartQuestions(q) {
+  q = q.toLowerCase();
+
+  if (q.includes('how many')) {
+    const labelMatch = latestChartData.find(d => q.includes(d.label));
+    if (labelMatch) return addStep(`✅ ${labelMatch.label} = ${labelMatch.value}`);
+    return addStep('❌ Could not find that item in the chart.');
+  }
+
+  if (q.includes('total')) {
+    const total = latestChartData.reduce((sum, d) => sum + d.value, 0);
+    return addStep(`🧮 Total = ${total}`);
+  }
+
+  if (q.includes('most') || q.includes('highest') || q.includes('maximum')) {
+    const max = latestChartData.reduce((a, b) => a.value > b.value ? a : b);
+    return addStep(`📈 Highest = ${max.label} (${max.value})`);
+  }
+
+  if (q.includes('least') || q.includes('lowest') || q.includes('minimum')) {
+    const min = latestChartData.reduce((a, b) => a.value < b.value ? a : b);
+    return addStep(`📉 Lowest = ${min.label} (${min.value})`);
+  }
+
+  return addStep('❓ Could not interpret the supplementary question.');
+}
+
+// Visual Renderers (unchanged – only updated for shared data usage)
+function renderBarGraph(q) {
+  const data = parseData(q);
+  if (!data) return addStep('❌ Could not parse bar graph data.');
+  addStep('📊 Bar Graph:');
+  data.forEach(({ label, value }) => {
+    addStep(`${label}: ` + '▮'.repeat(Math.round(value / 2)));
+  });
+}
+
+function renderLineGraph(q) {
+  const data = parseData(q);
+  if (!data) return addStep('❌ Could not parse line graph data.');
+  addStep('📈 Line Graph Trend:');
+  let prev = 0;
+  data.forEach(({ label, value }) => {
+    const trend = value > prev ? '↗️' : value < prev ? '↘️' : '➡️';
+    addStep(`${label}: ${value} ${trend}`);
+    prev = value;
+  });
+}
+
+function renderPieChart(q) {
+  const data = parseData(q);
+  if (!data) return addStep('❌ Could not parse pie chart data.');
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  addStep('🥧 Pie Chart Angles:');
+  data.forEach(({ label, value }) => {
+    const angle = ((value / total) * 360).toFixed(1);
+    addStep(`${label}: ${angle}°`);
+  });
+}
+
+function renderTally(q) {
+  const data = parseData(q);
+  if (!data) return addStep('❌ Could not parse tally data.');
+  addStep('📋 Tally Representation:');
+  data.forEach(({ label, value }) => {
+    const fives = Math.floor(value / 5);
+    const rem = value % 5;
+    const tally = '⟟'.repeat(fives) + '|'.repeat(rem);
+    addStep(`${label}: ${tally}`);
+  });
+}
+
+function renderPictograph(q) {
+  const data = parseData(q);
+  if (!data) return addStep('❌ Could not parse pictograph data.');
+  addStep('🖼️ Pictograph (1 🍎 = 5 units):');
+  data.forEach(({ label, value }) => {
+    const symbols = '🍎'.repeat(Math.round(value / 5));
+    addStep(`${label}: ${symbols}`);
+  });
+}
+// Topic Logic: Exponents
+function solveExponents(q) {
+  addStep(`⚡ Solving Exponents: ${q}`);
+
+  // Handle standard/exponential form conversion
+  const stdFormMatch = q.match(/(standard|exponential).*?(number\s*is\s*)?(\d+(?:\.\d+)?)/i);
+  if (stdFormMatch) {
+    const num = parseFloat(stdFormMatch[3]);
+    const sci = num.toExponential();
+    return addStep(`📐 ${num} in standard form = ${sci}`);
+  }
+
+  // Handle arithmetic operations with exponents (e.g., 2^3 * 2^4)
+  const expoMatch = q.match(/(\d+)\s*\^\s*(\d+)\s*([+\-*/])\s*(\d+)\s*\^\s*(\d+)/);
+  if (expoMatch) {
+    const [_, a1, p1, op, a2, p2] = expoMatch;
+    if (a1 === a2) {
+      let result;
+      switch (op) {
+        case '*': result = `${a1}^${+p1 + +p2}`; break;
+        case '/': result = `${a1}^${+p1 - +p2}`; break;
+        default: result = 'Cannot apply laws of exponents for + or - with same base';
+      }
+      return addStep(`🧮 Using laws of exponents → ${a1}^${p1} ${op} ${a2}^${p2} = ${result}`);
+    }
+  }
+
+  // Calculate a single exponential (e.g., 5^3)
+  const single = q.match(/(\d+(?:\.\d+)?)\s*\^\s*(-?\d+)/);
+  if (single) {
+    const base = parseFloat(single[1]);
+    const power = parseInt(single[2]);
+    const result = Math.pow(base, power);
+    return addStep(`✅ ${base}^${power} = ${result}`);
+  }
+
+  // Convert large/small numbers to exponential
+  const largeSmall = q.match(/convert\s+(\d+\.?\d*)\s+to\s+exponential\s+form/i);
+  if (largeSmall) {
+    const number = parseFloat(largeSmall[1]);
+    return addStep(`📐 ${number} in exponential form: ${number.toExponential()}`);
+  }
+
+  addStep('📚 Try: "Convert 6872 to exponential", "2^3 * 2^5", or "Standard form of 0.000034".');
+}
+// Topic Logic: Percentage
+function solvePercentage(q) {
+  addStep(`📊 Solving Percentage Problem: ${q}`);
+
+  // Convert % to decimal or fraction
+  if (/(\d+(\.\d+)?)\s*%/.test(q)) {
+    const num = parseFloat(q.match(/(\d+(\.\d+)?)\s*%/)[1]);
+    addStep(`🔁 Decimal = ${num} / 100 = ${num / 100}`);
+    addStep(`🔁 Fraction = ${num}/100`);
+    return;
+  }
+
+  // Convert to percentage
+  const fracMatch = q.match(/(\d+)\/(\d+)/);
+  if (fracMatch) {
+    const perc = (parseInt(fracMatch[1]) / parseInt(fracMatch[2])) * 100;
+    addStep(`✅ Percentage = (${fracMatch[1]} ÷ ${fracMatch[2]}) × 100 = ${perc.toFixed(2)}%`);
+    return;
+  }
+
+  // Ratio to percentage
+  const ratioMatch = q.match(/(\d+)\s*:\s*(\d+)/);
+  if (ratioMatch) {
+    const perc = (parseInt(ratioMatch[1]) / parseInt(ratioMatch[2])) * 100;
+    addStep(`✅ Percentage = (${ratioMatch[1]} ÷ ${ratioMatch[2]}) × 100 = ${perc.toFixed(2)}%`);
+    return;
+  }
+
+  // Word problem detection
+  const wp = q.match(/(\d+)[\s\w]*\b(?:of|on)\b[\s\w]*(\d+)/i);
+  if (wp) {
+    const perc = parseFloat(wp[1]);
+    const base = parseFloat(wp[2]);
+    const result = (perc / 100) * base;
+    addStep(`✅ ${perc}% of ${base} = (${perc}/100) × ${base} = ${result}`);
+    return;
+  }
+
+  // Reverse: "45 is what percent of 180?"
+  const reverse = q.match(/(\d+)[\s\w]*percent[\s\w]*(\d+)/i) || q.match(/(\d+)[\s\w]*of[\s\w]*(\d+)/i);
+  if (reverse) {
+    const part = parseFloat(reverse[1]);
+    const whole = parseFloat(reverse[2]);
+    const perc = (part / whole) * 100;
+    addStep(`🔁 ${part} is ${(perc).toFixed(2)}% of ${whole}`);
+    return;
+  }
+
+  addStep(`📚 Try using inputs like: "20% of 50", "2/5 as %", "8:10 as %", or "45 is what percent of 180?"`);
+}
+// Topic Logic: Factorisation
+function solveFactorisation(q) {
+  addStep(`🧮 Solving Factorisation: ${q}`);
+
+  try {
+    const simplified = math.simplify(q);
+    const factored = math.factor(q);
+
+    if (simplified.toString() !== factored.toString()) {
+      addStep(`🧾 Simplified: ${simplified}`);
+      addStep(`✅ Factored: ${factored}`);
+    } else {
+      addStep(`📌 No further factorisation possible. Simplified: ${simplified}`);
+    }
+  } catch (e) {
+    addStep(`❌ Could not factor the expression. Try simpler form or check syntax.`);
+    return;
+  }
+
+  // Handle common patterns manually if needed
+  if (/^(\d+)(x\^2)\+(\d+)(x)\+(\d+)$/.test(q.replace(/\s+/g, ''))) {
+    addStep(`📚 Looks like a quadratic trinomial. Consider middle-term splitting.`);
+  }
+
+  if (/x\^2\s*-\s*\d+/.test(q)) {
+    const num = parseInt(q.match(/x\^2\s*-\s*(\d+)/)[1]);
+    const root = Math.sqrt(num);
+    if (Number.isInteger(root)) {
+      addStep(`✅ This is a difference of squares: (x + ${root})(x - ${root})`);
+    }
+  }
+
+  if (/\(.+\)\(.+\)/.test(q)) {
+    addStep(`🔁 This appears already factored.`);
+  }
+}
+// Topic Logic: Polynomials
+function solvePolynomials(q) {
+  addStep(`🔢 Solving Polynomial: ${q}`);
+
+  const terms = q.match(/[+-]?\s*\d*[a-z]?\^?\d*/gi)?.filter(t => t.trim() !== '');
+  if (!terms || terms.length === 0) {
+    return addStep('❌ Could not detect polynomial terms. Try rephrasing.');
+  }
+
+  const simplified = terms.map(t => t.replace(/\s+/g, '')).join(' + ').replace(/\+\s*\-/g, '- ');
+  addStep(`🔎 Parsed Terms: ${simplified}`);
+
+  // Degree calculation
+  const degrees = terms.map(t => {
+    const match = t.match(/\^(\d+)/);
+    return match ? parseInt(match[1]) : (/[a-z]/i.test(t) ? 1 : 0);
+  });
+
+  const maxDegree = Math.max(...degrees);
+  addStep(`📐 Degree of the polynomial: ${maxDegree}`);
+
+  if (terms.length === 1) {
+    addStep(`📘 This is a monomial.`);
+  } else if (terms.length === 2) {
+    addStep(`📘 This is a binomial.`);
+  } else if (terms.length === 3) {
+    addStep(`📘 This is a trinomial.`);
   } else {
-    addStep('❌ Unknown probability format. Try: "dice toss", "coin flip" etc.', true);
+    addStep(`📘 This is a polynomial with ${terms.length} terms.`);
+  }
+
+  // If two polynomials given for operations
+  const opMatch = q.match(/(.+)\s*(\+|\-|\*)\s*(.+)/);
+  if (opMatch) {
+    const [, first, operator, second] = opMatch;
+    try {
+      const result = math.simplify(`(${first}) ${operator} (${second})`).toString();
+      addStep(`✅ ${first} ${operator} ${second} = ${result}`);
+    } catch {
+      addStep('⚠️ Unable to simplify polynomial operation.');
+    }
+  } else {
+    try {
+      const simplified = math.simplify(q).toString();
+      addStep(`🧮 Simplified Polynomial: ${simplified}`);
+    } catch {
+      addStep('⚠️ Unable to simplify the polynomial.');
+    }
+  }
+}
+// Topic Logic: Polynomials
+function solvePolynomials(q) {
+  addStep(`🔢 Solving Polynomial Problem: ${q}`);
+
+  if (/add|sum|plus/i.test(q) && q.includes('x')) {
+    const match = q.match(/([-+]?[\d]*x(?:\^\d+)?)/g);
+    if (match && match.length >= 2) {
+      const expr = match.join(' + ');
+      return solveBasic("Polynomial Addition", expr);
+    }
+  }
+
+  if (/subtract|minus/i.test(q) && q.includes('x')) {
+    const match = q.match(/([-+]?[\d]*x(?:\^\d+)?)/g);
+    if (match && match.length >= 2) {
+      const expr = match[0] + ' - ' + match[1];
+      return solveBasic("Polynomial Subtraction", expr);
+    }
+  }
+
+  if (/multiply|product/i.test(q)) {
+    const match = q.match(/([-+]?\d*x(?:\^\d+)?)/g);
+    if (match && match.length >= 2) {
+      const expr = match[0] + ' * ' + match[1];
+      return solveBasic("Polynomial Multiplication", expr);
+    }
+  }
+
+  if (/divide/i.test(q)) {
+    const match = q.match(/([-+]?\d*x(?:\^\d+)?)/g);
+    if (match && match.length >= 2) {
+      const expr = match[0] + ' / ' + match[1];
+      return solveBasic("Polynomial Division", expr);
+    }
+  }
+
+  if (/like terms/i.test(q)) {
+    return addStep("✅ Like terms are those with the same variables and powers. Combine their coefficients.");
+  }
+
+  if (/degree/i.test(q)) {
+    const match = q.match(/x\^(\d+)/);
+    if (match) return addStep(`📐 Degree of the polynomial is ${match[1]}`);
+    const linearMatch = q.match(/x(?!\^)/);
+    if (linearMatch) return addStep("📐 Degree of the polynomial is 1");
+  }
+
+  addStep('📚 Try using operations like add, subtract, multiply, divide polynomials or ask about degrees.');
+}
+function solvePolynomials(q) {
+  addStep(`🧮 Solving Polynomial Expression: ${q}`);
+  try {
+    // Match basic polynomial patterns
+    if (/[\+\-\*\/]/.test(q) && /x/.test(q)) {
+      const cleaned = q.replace(/\^/g, '**');
+      const simplified = math.simplify(cleaned).toString();
+      addStep(`✅ Simplified Polynomial: ${simplified}`);
+      return;
+    }
+
+    // Check degree of polynomial
+    const xTerms = q.match(/x\^?\d*/g);
+    if (xTerms) {
+      const degrees = xTerms.map(t => {
+        const power = t.split('^')[1];
+        return power ? parseInt(power) : 1;
+      });
+      const maxDegree = Math.max(...degrees);
+      addStep(`📘 Degree of the polynomial: ${maxDegree}`);
+    }
+
+    // Factorization using algebra
+    const factored = math.simplify(`factor(${q})`);
+    if (factored && factored.toString() !== q) {
+      addStep(`🧩 Factored Form: ${factored.toString()}`);
+    }
+
+    // Evaluate at a given value
+    const evalMatch = q.match(/(.+)\s+at\s+x\s*=\s*(-?\d+)/i);
+    if (evalMatch) {
+      const expr = evalMatch[1];
+      const xVal = parseFloat(evalMatch[2]);
+      const exprWithX = expr.replace(/x/g, `(${xVal})`).replace(/\^/g, '**');
+      const result = math.evaluate(exprWithX);
+      addStep(`📍 Value of polynomial at x = ${xVal}: ${result}`);
+    }
+  } catch (e) {
+    addStep(`❌ Could not solve the polynomial: ${e.message}`);
+  }
+}
+function solveLinear(q) {
+  addStep(`📗 Solving Linear Equation: ${q}`);
+
+  // 1. One-variable equations like "2x + 3 = 11"
+  if (/^[\d\w\s+\-*/=x]+$/.test(q)) {
+    try {
+      const expr = q.replace(/\s/g, '');
+      const [left, right] = expr.split('=');
+      const equation = `${left} - (${right})`;  // Move everything to LHS
+      const solution = math.simplify(equation).solveFor("x");
+      addStep(`✅ x = ${solution}`, true);
+      return;
+    } catch (e) {
+      addStep('❌ Unable to solve algebraically. Try a valid one-variable equation.', true);
+    }
+  }
+
+  // 2. Two-variable equations: "x + y = 5 and x - y = 1"
+  if (/x\s*[\+\-*/]\s*y\s*=\s*\d+/i.test(q) && /and/i.test(q)) {
+    const eqns = q.split(/and/i).map(e => e.trim());
+    try {
+      const solutions = math.solve(eqns, ['x', 'y']);
+      addStep(`✅ x = ${solutions.x}, y = ${solutions.y}`, true);
+      return;
+    } catch {
+      addStep('❌ Could not solve the system of equations.', true);
+    }
+  }
+
+  // 3. Word Problem: "The sum of two numbers is 20 and their difference is 6"
+  if (/sum.*?(\d+).*?difference.*?(\d+)/i.test(q)) {
+    const sum = parseInt(q.match(/sum.*?(\d+)/i)[1]);
+    const diff = parseInt(q.match(/difference.*?(\d+)/i)[1]);
+
+    const a = (sum + diff) / 2;
+    const b = sum - a;
+
+    addStep(`Let the two numbers be x and y.`);
+    addStep(`x + y = ${sum}, x - y = ${diff}`);
+    addStep(`Solving gives: x = ${(sum + diff) / 2}, y = ${(sum - diff) / 2}`);
+    addStep(`✅ Numbers: ${a} and ${b}`, true);
+    return;
+  }
+
+  // 4. Cost-based problem: "2 pens and 3 pencils cost ₹28"
+  if (/(\d+)\s*pens?.*?(\d+)\s*pencils?.*?(\d+)/i.test(q)) {
+    const [_, pCount, pencilCount, total] = q.match(/(\d+)\s*pens?.*?(\d+)\s*pencils?.*?(\d+)/i);
+    addStep(`Let cost of pen = x, pencil = y`);
+    addStep(`${pCount}x + ${pencilCount}y = ${total}`);
+    addStep(`⚠️ One equation with two unknowns. More info needed to solve.`); 
+    return;
+  }
+
+  addStep('📚 Please provide a solvable linear equation or word problem format.', true);
+}
+function solveDivisibility(q) {
+  addStep('🔎 Checking Divisibility Rules for: ' + q);
+  const numMatch = q.match(/\d+/g);
+  if (!numMatch) return addStep('❌ No number found in input.', true);
+  const num = parseInt(numMatch[0]);
+
+  const checks = [
+    { rule: 2, valid: num % 2 === 0, explanation: 'even number (last digit 0,2,4,6,8)' },
+    { rule: 3, valid: sumDigits(num) % 3 === 0, explanation: 'sum of digits divisible by 3' },
+    { rule: 4, valid: num % 100 % 4 === 0, explanation: 'last 2 digits divisible by 4' },
+    { rule: 5, valid: num % 10 === 0 || num % 10 === 5, explanation: 'ends in 0 or 5' },
+    { rule: 6, valid: num % 2 === 0 && sumDigits(num) % 3 === 0, explanation: 'divisible by both 2 and 3' },
+    { rule: 7, valid: num % 7 === 0, explanation: 'remainder is 0 when divided by 7' },
+    { rule: 8, valid: num % 1000 % 8 === 0, explanation: 'last 3 digits divisible by 8' },
+    { rule: 9, valid: sumDigits(num) % 9 === 0, explanation: 'sum of digits divisible by 9' },
+    { rule: 10, valid: num % 10 === 0, explanation: 'ends in 0' },
+    { rule: 11, valid: isDiv11(num), explanation: 'alternating sum of digits divisible by 11' },
+    { rule: 13, valid: num % 13 === 0, explanation: 'remainder is 0 when divided by 13' },
+    { rule: 15, valid: num % 3 === 0 && num % 5 === 0, explanation: 'divisible by both 3 and 5' },
+    { rule: 17, valid: num % 17 === 0, explanation: 'remainder is 0 when divided by 17' },
+    { rule: 19, valid: num % 19 === 0, explanation: 'remainder is 0 when divided by 19' }
+  ];
+
+  checks.forEach(({ rule, valid, explanation }) => {
+    addStep(`➤ ${num} is ${valid ? '' : 'not '}divisible by ${rule} (${explanation})`);
+  });
+
+  function sumDigits(n) {
+    return n.toString().split('').reduce((sum, d) => sum + parseInt(d), 0);
+  }
+
+  function isDiv11(n) {
+    const digits = n.toString().split('').map(Number);
+    const altSum = digits.reduce((sum, digit, i) => sum + (i % 2 === 0 ? digit : -digit), 0);
+    return altSum % 11 === 0;
+  }
+}
+function solveInequalities(q) {
+  addStep(`📏 Solving Inequality: ${q}`);
+
+  // Normalize inequality operators
+  q = q.replace(/≤/g, "<=").replace(/≥/g, ">=");
+
+  const compoundMatch = q.match(/(.*?)(<=|<|>=|>)(.*?)(<=|<|>=|>)(.*)/);
+  if (compoundMatch) {
+    const left = compoundMatch[1].trim();
+    const op1 = compoundMatch[2];
+    const mid = compoundMatch[3].trim();
+    const op2 = compoundMatch[4];
+    const right = compoundMatch[5].trim();
+
+    addStep(`📘 Compound inequality detected: ${left} ${op1} ${mid} ${op2} ${right}`);
+
+    try {
+      // Convert to two separate inequalities and solve both
+      const res1 = math.simplify(`${left} ${op1} ${mid}`).toString();
+      const res2 = math.simplify(`${mid} ${op2} ${right}`).toString();
+
+      addStep(`🔹 Part 1: ${res1}`);
+      addStep(`🔹 Part 2: ${res2}`);
+      addStep(`✅ Compound inequality is valid if both parts are true.`);
+    } catch (e) {
+      addStep('❌ Error solving compound inequality: ' + e.message);
+    }
+    return;
+  }
+
+  // Handle simple inequality
+  const ops = ['<=', '>=', '<', '>'];
+  let op = ops.find(o => q.includes(o));
+  if (!op) return addStep('❌ No valid inequality operator found (<, >, <=, >=)', true);
+
+  const [lhs, rhs] = q.split(op).map(e => e.trim());
+
+  try {
+    const expr = math.simplify(`${lhs} - (${rhs})`).toString();
+    const variableMatch = lhs.match(/[a-zA-Z]/g);
+    const variable = variableMatch ? variableMatch[0] : 'x';
+    const solution = math.solve(q, variable);
+
+    if (solution.length === 0) return addStep('❌ No solution found.');
+
+    addStep(`✅ Solution: ${variable} ${op} ${solution[0]}`, true);
+  } catch (err) {
+    addStep('❌ Error solving: ' + err.message, true);
+  }
+}
+function solveFractions(q) {
+  addStep(`➗ Solving Fraction Question: ${q}`);
+
+  // Word problem pattern
+  const parts = q.match(/(\d+\/\d+).*(\+|add|and).*(\d+\/\d+)/i);
+  if (parts) {
+    const f1 = math.fraction(parts[1]);
+    const f2 = math.fraction(parts[3]);
+    const result = math.add(f1, f2);
+    return addStep(`✅ ${parts[1]} + ${parts[3]} = ${result.n}/${result.d}`, true);
+  }
+
+  try {
+    // Mixed numbers normalization
+    q = q.replace(/(\d+)\s+(\d+)\/(\d+)/g, (_, int, num, den) => {
+      return `(${int} + ${num}/${den})`;
+    });
+
+    const result = math.evaluate(q);
+    addStep(`✅ Answer: ${result}`, true);
+  } catch (e) {
+    addStep('❌ Could not evaluate the expression. Try simpler format like "1/2 + 3/4"', true);
+  }
+}
+function solveDecimals(q) {
+  addStep(`🔢 Solving Decimal Word Problem: ${q}`);
+
+  // Pattern: amount * hours
+  const match = q.match(/([\d.]+)\s*(liters|km|hours|times|rupees)?\s*(per|every)\s*(hour|day|km|time)?.*?(\d+)\s*(hour|day|time|km)?/i);
+  if (match) {
+    const value = parseFloat(match[1]);
+    const times = parseInt(match[5]);
+    const total = value * times;
+    return addStep(`✅ Total = ${value} × ${times} = ${total}`, true);
+  }
+
+  try {
+    const result = math.evaluate(q);
+    addStep(`✅ Answer: ${result}`, true);
+  } catch (e) {
+    addStep('❌ Could not evaluate the decimal expression.', true);
+  }
+}
+function solveArithmetic(q) {
+  addStep(`🧮 Solving Arithmetic Operation: ${q}`);
+
+  // Natural Language: Add/Subtract/Multiply/Divide
+  if (/sum of (\d+) and (\d+)/i.test(q)) {
+    const [_, a, b] = q.match(/sum of (\d+) and (\d+)/i);
+    return addStep(`✅ ${a} + ${b} = ${parseInt(a) + parseInt(b)}`, true);
+  }
+
+  if (/difference between (\d+) and (\d+)/i.test(q)) {
+    const [_, a, b] = q.match(/difference between (\d+) and (\d+)/i);
+    return addStep(`✅ ${a} - ${b} = ${parseInt(a) - parseInt(b)}`, true);
+  }
+
+  if (/product of (\d+) and (\d+)/i.test(q)) {
+    const [_, a, b] = q.match(/product of (\d+) and (\d+)/i);
+    return addStep(`✅ ${a} × ${b} = ${parseInt(a) * parseInt(b)}`, true);
+  }
+
+  if (/quotient of (\d+) and (\d+)/i.test(q)) {
+    const [_, a, b] = q.match(/quotient of (\d+) and (\d+)/i);
+    return addStep(`✅ ${a} ÷ ${b} = ${parseInt(a) / parseInt(b)}`, true);
+  }
+
+  // Word Problem: "A number is subtracted from X to get Y"
+  const pattern = /a number is (added to|subtracted from|multiplied by|divided into) (\d+).*get (\d+)/i;
+  const match = q.match(pattern);
+  if (match) {
+    const op = match[1];
+    const known = parseInt(match[2]);
+    const result = parseInt(match[3]);
+    let unknown;
+
+    if (op.includes('added')) unknown = result - known;
+    else if (op.includes('subtracted')) unknown = known - result;
+    else if (op.includes('multiplied')) unknown = result / known;
+    else if (op.includes('divided')) unknown = known / result;
+
+    return addStep(`✅ Required number is ${unknown}`, true);
+  }
+
+  // Evaluate direct arithmetic input like "78 + 45 - 30"
+  try {
+    const result = math.evaluate(q);
+    addStep(`✅ Answer: ${result}`, true);
+  } catch (e) {
+    addStep('❌ Unable to solve. Use expressions like "sum of 34 and 56" or "45 + 78".', true);
+  }
+}
+function solveArea(q) {
+  addStep(`📐 Solving Area Question: ${q}`);
+  const match = q.match(/(square|rectangle|circle|triangle|trapezium|parallelogram).*?(\d+).*?(cm|m).*?(\d+).*?(cm|m)/i);
+  if (match) {
+    const shape = match[1];
+    const a = parseFloat(match[2]);
+    const b = parseFloat(match[4]);
+
+    let area;
+    if (shape === 'square') area = a * a;
+    else if (shape === 'rectangle') area = a * b;
+    else if (shape === 'triangle') area = 0.5 * a * b;
+    else if (shape === 'parallelogram') area = a * b;
+    else if (shape === 'trapezium') area = 0.5 * (a + b) * parseFloat(q.match(/height.*?(\d+)/i)?.[1] || 1);
+    else if (shape === 'circle') {
+      const radius = parseFloat(q.match(/radius.*?(\d+)/i)?.[1] || a);
+      area = Math.PI * radius * radius;
+    }
+
+    if (area) return addStep(`✅ Area of ${shape} = ${area.toFixed(2)} sq units`, true);
+  }
+
+  if (q.includes("find height") && q.includes("area")) {
+    const match = q.match(/area.*?(\d+).*?base.*?(\d+)/i);
+    if (match) {
+      const area = parseFloat(match[1]);
+      const base = parseFloat(match[2]);
+      const height = (2 * area) / base;
+      return addStep(`✅ Height = (2 × ${area}) ÷ ${base} = ${height}`, true);
+    }
+  }
+
+  addStep("❌ Couldn't parse. Try 'area of rectangle with length 5 cm and breadth 3 cm'.", true);
+}
+function solvePerimeter(q) {
+  addStep(`📏 Solving Perimeter Problem: ${q}`);
+  const match = q.match(/(square|rectangle|triangle).*?(\d+).*?(and|,)?\s?(\d+)?/i);
+  if (match) {
+    const shape = match[1];
+    const a = parseFloat(match[2]);
+    const b = parseFloat(match[4]) || a;
+    let result = 0;
+
+    if (shape === 'square') result = 4 * a;
+    else if (shape === 'rectangle') result = 2 * (a + b);
+    else if (shape === 'triangle') result = a * 3;
+
+    return addStep(`✅ Perimeter of ${shape} = ${result}`, true);
+  }
+  addStep("❌ Try like 'Perimeter of rectangle with length 8 and breadth 5'", true);
+}
+function solveRationalNumbers(q) {
+  addStep(`🔢 Solving Rational Number Operation: ${q}`);
+  try {
+    if (/add|subtract|multiply|divide/i.test(q)) {
+      const expr = q.replace(/add|sum|plus/gi, '+')
+                    .replace(/subtract|minus/gi, '-')
+                    .replace(/multiply|times/gi, '*')
+                    .replace(/divide|divided by/gi, '/');
+      const result = math.evaluate(expr);
+      addStep(`✅ Result: ${result}`, true);
+      return;
+    }
+
+    if (/reciprocal of (-?\d+\/\d+)/i.test(q)) {
+      const frac = q.match(/-?\d+\/\d+/)[0];
+      const [num, den] = frac.split('/').map(Number);
+      if (num === 0) return addStep('❌ Reciprocal of 0 is undefined.');
+      return addStep(`✅ Reciprocal of ${frac} is ${den}/${num}`, true);
+    }
+
+    addStep('❌ Try "Add 2/3 and 3/4" or "Reciprocal of -5/6"', true);
+  } catch (e) {
+    addStep('❌ Error in solving rational expression.', true);
+  }
+}
+function solveIntegers(q) {
+  addStep(`➕ Integer Arithmetic Solver: ${q}`);
+  const match = q.match(/(-?\d+)\s*(\+|\-|\*|\/)\s*(-?\d+)/);
+  if (match) {
+    const [_, a, op, b] = match;
+    const result = math.evaluate(`${a} ${op} ${b}`);
+    return addStep(`✅ ${a} ${op} ${b} = ${result}`, true);
+  }
+
+  if (/gain|loss|temperature/i.test(q)) {
+    addStep('📘 Contextual word problem (gain/loss/temperature) support added soon.');
+  } else {
+    addStep('❌ Try: "-3 + 5" or "Add -4 and 7".', true);
+  }
+}
+function solveVolume(q) {
+  addStep(`📦 Solving Volume/Surface Area: ${q}`);
+  if (/cube/i.test(q)) {
+    const side = parseFloat(q.match(/side.*?(\d+)/i)?.[1]);
+    if (side) {
+      addStep(`✅ Volume of cube = ${side ** 3}`);
+      addStep(`✅ Surface area = ${6 * (side ** 2)}`);
+      return;
+    }
+  }
+  if (/cuboid/i.test(q)) {
+    const dims = q.match(/length.*?(\d+).*?breadth.*?(\d+).*?height.*?(\d+)/i);
+    if (dims) {
+      const [_, l, b, h] = dims.map(Number);
+      addStep(`✅ Volume = ${l * b * h}`);
+      addStep(`✅ Surface Area = ${2 * (l * b + b * h + h * l)}`);
+      return;
+    }
+  }
+  if (/cylinder/i.test(q)) {
+    const r = parseFloat(q.match(/radius.*?(\d+)/i)?.[1]);
+    const h = parseFloat(q.match(/height.*?(\d+)/i)?.[1]);
+    if (r && h) {
+      const vol = Math.PI * r * r * h;
+      const sa = 2 * Math.PI * r * (r + h);
+      addStep(`✅ Volume = π × r² × h = ${vol.toFixed(2)}`);
+      addStep(`✅ Surface Area = 2πr(r+h) = ${sa.toFixed(2)}`);
+      return;
+    }
+  }
+
+  addStep('❌ Try "Volume of cube with side 4 cm" or "Cylinder radius 3, height 5".', true);
+}
+// Topic Logic: Geometry (Expanded)
+function solveGeometry(q) {
+  addStep(`📏 Solving Geometry: ${q}`);
+
+  // Coordinate Geometry
+  if (/distance.*between.*\((\d+),\s*(\d+)\).*\((\d+),\s*(\d+)\)/i.test(q)) {
+    const match = q.match(/\((\d+),\s*(\d+)\).*\((\d+),\s*(\d+)\)/);
+    const [x1, y1, x2, y2] = match.slice(1).map(Number);
+    const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2).toFixed(2);
+    return addStep(`✅ Distance = ${distance}`);
+  }
+
+  // Angle Theorems
+  if (/angle.*triangle.*sum/i.test(q)) {
+    return addStep(`✅ The sum of angles in a triangle is always 180°.`);
+  }
+
+  if (/alternate interior|corresponding angles|transversal/i.test(q)) {
+    return addStep(`📐 Based on angle theorems, corresponding/alternate interior angles are equal if lines are parallel.`);
+  }
+
+  // Construction (basic logic explanation)
+  if (/construct.*(angle|bisector|perpendicular|triangle)/i.test(q)) {
+    return addStep(`🛠️ Constructions require compass and ruler: Use arcs to draw accurate ${RegExp.$1} constructions.`);
+  }
+
+  return addStep('📚 Try using keywords like "coordinate geometry", "angles", or "construct..."');
+}
+function solveGeometry(q) {
+  addStep(`📐 Geometry Problem: ${q}`);
+
+  // Sum of angles in triangle
+  if (/sum.*angles.*triangle/i.test(q)) {
+    return addStep('✅ Sum of angles in a triangle is always 180°');
+  }
+
+  // Exterior angle
+  if (/exterior angle.*triangle.*equal to/i.test(q)) {
+    return addStep('✅ Exterior angle = sum of opposite interior angles');
+  }
+
+  // Right-angled triangle with Pythagoras check
+  if (/right.*triangle.*sides.*(\d+).*?(\d+).*?(\d+)/i.test(q)) {
+    const nums = q.match(/(\d+)/g).map(Number).sort((a, b) => a - b);
+    const [a, b, c] = nums;
+    const isRight = a * a + b * b === c * c;
+    return addStep(`✅ ${a}² + ${b}² ${isRight ? '=' : '≠'} ${c}² → ${isRight ? 'Right-angled triangle' : 'Not right-angled'}`);
+  }
+
+  // Triangle types by side
+  if (/triangle.*sides.*?(\d+).*?(\d+).*?(\d+)/i.test(q)) {
+    const [a, b, c] = q.match(/(\d+)/g).map(Number);
+    if (a === b && b === c) return addStep('✅ Equilateral triangle: all sides equal');
+    if (a === b || b === c || a === c) return addStep('✅ Isosceles triangle: two sides equal');
+    return addStep('✅ Scalene triangle: all sides different');
+  }
+
+  // Circle properties
+  if (/circle.*radius.*?(\d+)/i.test(q)) {
+    const r = parseFloat(q.match(/radius.*?(\d+)/)[1]);
+    addStep(`✅ Diameter = 2 × ${r} = ${2 * r}`);
+    addStep(`✅ Circumference = 2π × ${r} = ${(2 * Math.PI * r).toFixed(2)}`);
+    addStep(`✅ Area = π × ${r}² = ${(Math.PI * r * r).toFixed(2)}`);
+    return;
+  }
+
+  // Shape properties
+  if (/quadrilateral|parallelogram|trapezium|rhombus|rectangle|square/i.test(q)) {
+    if (/square/i.test(q)) {
+      return addStep('✅ Square: All sides equal, all angles 90°, diagonals bisect each other at 90°');
+    }
+    if (/rectangle/i.test(q)) {
+      return addStep('✅ Rectangle: Opposite sides equal, all angles 90°, diagonals equal and bisect each other');
+    }
+    if (/rhombus/i.test(q)) {
+      return addStep('✅ Rhombus: All sides equal, opposite angles equal, diagonals bisect at 90°');
+    }
+    if (/parallelogram/i.test(q)) {
+      return addStep('✅ Parallelogram: Opposite sides equal and parallel, opposite angles equal');
+    }
+    if (/trapezium/i.test(q)) {
+      return addStep('✅ Trapezium: Only one pair of opposite sides parallel');
+    }
+    if (/quadrilateral/i.test(q)) {
+      return addStep('✅ Quadrilateral: Any 4-sided closed figure, sum of angles = 360°');
+    }
+  }
+
+  // 3D Geometry keywords
+  if (/3d|volume|surface area|faces|edges|vertices/i.test(q)) {
+    return addStep('🧱 For 3D shapes, please use Volume & Surface Area topic or try: "cube with edge 5 cm"');
+  }
+
+  addStep("📚 Try: 'Sum of angles in triangle', 'Circle radius 7', 'Type of triangle with sides 3,4,5'", true);
+}
+function solveSimpleInterest(q) {
+  addStep(`💰 Solving Simple Interest: ${q}`);
+  const match = q.match(/(?:principal|P)\s*=?\s*(\d+).*?(?:rate|R)\s*=?\s*(\d+).*?(?:time|T)\s*=?\s*(\d+)/i);
+  if (match) {
+    const P = parseFloat(match[1]);
+    const R = parseFloat(match[2]);
+    const T = parseFloat(match[3]);
+    const SI = (P * R * T) / 100;
+    addStep(`📘 Formula: SI = (P × R × T) / 100`);
+    addStep(`✅ SI = (${P} × ${R} × ${T}) / 100 = ${SI}`);
+    return;
+  }
+
+  const reverseMatch = q.match(/(?:SI)\s*=?\s*(\d+).*?(?:rate|R)\s*=?\s*(\d+).*?(?:time|T)\s*=?\s*(\d+)/i);
+  if (reverseMatch) {
+    const SI = parseFloat(reverseMatch[1]);
+    const R = parseFloat(reverseMatch[2]);
+    const T = parseFloat(reverseMatch[3]);
+    const P = (SI * 100) / (R * T);
+    addStep(`📘 Reverse formula: P = (SI × 100) / (R × T)`);
+    addStep(`✅ P = (${SI} × 100) / (${R} × ${T}) = ${P}`);
+    return;
+  }
+
+  addStep("❌ Please provide values for Principal (P), Rate (R), and Time (T) clearly.");
+}
+function solveCompoundInterest(q) {
+  addStep(`💸 Solving Compound Interest: ${q}`);
+  const match = q.match(/(?:principal|P)\s*=?\s*(\d+).*?(?:rate|R)\s*=?\s*(\d+).*?(?:time|T)\s*=?\s*(\d+)/i);
+  if (match) {
+    const P = parseFloat(match[1]);
+    const R = parseFloat(match[2]);
+    const T = parseFloat(match[3]);
+    const A = P * Math.pow(1 + R / 100, T);
+    const CI = A - P;
+    addStep(`📘 Formula: CI = P(1 + R/100)^T - P`);
+    addStep(`✅ CI = ${P} × (1 + ${R}/100)^${T} - ${P}`);
+    addStep(`✅ Final Amount = ${A.toFixed(2)}, CI = ${CI.toFixed(2)}`);
+    return;
+  }
+
+  addStep("❌ Provide values for Principal (P), Rate (R), and Time (T).");
+}
+let score = 0;
+let totalQuestions = 0;
+
+function addStep(msg) {
+  const output = document.getElementById('output');
+  output.innerHTML += `<p>${msg}</p>`;
+}
+
+function clearOutput() {
+  document.getElementById('output').innerHTML = '';
+}
+
+function handleInput() {
+  clearOutput();
+  const topic = document.getElementById('topic').value;
+  const q = document.getElementById('question').value.trim();
+  switch (topic) {
+    case 'mcq': return generateMCQ();
+    // Other topics...
+    default: addStep('❌ Unknown topic.');
   }
 }
 
-function solveGeometry(input) {
-  addStep('📐 Geometry Q&A');
-  addStep('Q: ' + input);
-  addStep('[Sample Answer] A radius is a line from center to any point on the circle.', true);
+// MCQ Data Bank
+const mcqs = [
+  // Algebraic Expressions
+  {
+    question: "What is the simplified form of: 2x + 3x - 5?",
+    options: ["5x – 5", "5x", "x", "x – 5"],
+    answer: 0
+  },
+  {
+    question: "Which identity is (a + b)^2?",
+    options: ["a² + 2ab + b²", "a² – 2ab + b²", "a² + b²", "a² – b²"],
+    answer: 0
+  },
+
+  // Area
+  {
+    question: "What is the area of a rectangle with length 8 cm and breadth 5 cm?",
+    options: ["13 cm²", "40 cm²", "20 cm²", "30 cm²"],
+    answer: 1
+  },
+  {
+    question: "Area of a circle with radius 7 cm is?",
+    options: ["154 cm²", "49 cm²", "44 cm²", "100 cm²"],
+    answer: 0
+  },
+
+  // Volume & Surface Area
+  {
+    question: "Volume of a cube with edge 5 cm is?",
+    options: ["125 cm³", "100 cm³", "25 cm³", "225 cm³"],
+    answer: 0
+  },
+  {
+    question: "Surface area of a cube with side 4 cm is?",
+    options: ["64 cm²", "96 cm²", "48 cm²", "100 cm²"],
+    answer: 1
+  },
+
+  // Exponents
+  {
+    question: "Which law of exponent is used in: a⁴ × a³ = a⁷?",
+    options: ["Power of power", "Product of powers", "Quotient rule", "None"],
+    answer: 1
+  },
+  {
+    question: "10³ means:",
+    options: ["10", "30", "100", "1000"],
+    answer: 3
+  },
+
+  // Percentage
+  {
+    question: "25% as a fraction is:",
+    options: ["1/2", "2/5", "1/4", "1/5"],
+    answer: 2
+  },
+  {
+    question: "What is 30% of 200?",
+    options: ["30", "50", "60", "80"],
+    answer: 2
+  },
+
+  // Factorisation
+  {
+    question: "Factorisation of x² - 9 is:",
+    options: ["(x + 3)(x + 3)", "(x - 3)(x - 3)", "(x - 3)(x + 3)", "None"],
+    answer: 2
+  },
+  {
+    question: "Which is the correct factor of 4x² + 4x + 1?",
+    options: ["(2x + 1)²", "(x + 1)²", "(2x + 1)(2x - 1)", "(4x + 1)(x + 1)"],
+    answer: 0
+  },
+
+  // Geometry
+  {
+    question: "How many angles does a hexagon have?",
+    options: ["6", "5", "8", "4"],
+    answer: 0
+  },
+  {
+    question: "What is the sum of angles in a triangle?",
+    options: ["90°", "180°", "360°", "270°"],
+    answer: 1
+  },
+
+  // Data Handling
+  {
+    question: "What does a pie chart represent?",
+    options: ["Bars", "Fractions", "Pictures", "None"],
+    answer: 1
+  },
+  {
+    question: "Which graph shows change over time?",
+    options: ["Bar graph", "Line graph", "Pie chart", "Pictograph"],
+    answer: 1
+  },
+
+  // Profit & Loss
+  {
+    question: "Profit is calculated using:",
+    options: ["SP - CP", "CP - SP", "SP × CP", "None"],
+    answer: 0
+  },
+  {
+    question: "Loss is calculated using:",
+    options: ["CP - SP", "SP - CP", "SP + CP", "None"],
+    answer: 0
+  }
+];
+
+let currentQuestionIndex = 0;
+
+function generateMCQ() {
+  clearOutput();
+  if (currentQuestionIndex >= mcqs.length) {
+    addStep(`✅ Quiz completed. Final Score: ${score}/${totalQuestions}`);
+    return;
+  }
+
+  const mcq = mcqs[currentQuestionIndex];
+  totalQuestions++;
+
+  const optionsHTML = mcq.options.map((opt, i) =>
+    `<button onclick="checkAnswer(${i})">${opt}</button>`
+  ).join('<br>');
+
+  document.getElementById('output').innerHTML = `
+    <h3>📘 Q${currentQuestionIndex + 1}: ${mcq.question}</h3>
+    ${optionsHTML}
+  `;
+}
+
+function checkAnswer(selectedIndex) {
+  const mcq = mcqs[currentQuestionIndex];
+  if (selectedIndex === mcq.answer) {
+    score++;
+    addStep('✅ Correct!');
+  } else {
+    addStep(`❌ Incorrect. Correct answer: ${mcq.options[mcq.answer]}`);
+  }
+  currentQuestionIndex++;
+  setTimeout(() => generateMCQ(), 1000);
+}
+
+// Include 'mcq' in dropdown <select> with label "MCQ Quiz"
+// <option value="mcq">MCQ Quiz</option>
+  // logic.js – Full Script with MCQ Generator, Subjective Questions and Scoring
+
+let score = 0;
+let totalQuestions = 0;
+
+function addStep(msg) {
+  const output = document.getElementById('output');
+  output.innerHTML += `<p>${msg}</p>`;
+}
+
+function clearOutput() {
+  document.getElementById('output').innerHTML = '';
+}
+
+function handleInput() {
+  clearOutput();
+  const topic = document.getElementById('topic').value;
+  const q = document.getElementById('question').value.trim();
+  switch (topic) {
+    case 'mcq': return generateMCQ();
+    case 'subjective': return generateSubjective();
+    default: addStep('❌ Unknown topic.');
+  }
+}
+
+// MCQ Data Bank
+const mcqs = [
+  // [...MCQs as before, unchanged...]
+];
+
+let currentQuestionIndex = 0;
+
+function generateMCQ() {
+  clearOutput();
+  if (currentQuestionIndex >= mcqs.length) {
+    addStep(`✅ Quiz completed. Final Score: ${score}/${totalQuestions}`);
+    return;
+  }
+
+  const mcq = mcqs[currentQuestionIndex];
+  totalQuestions++;
+
+  const optionsHTML = mcq.options.map((opt, i) =>
+    `<button onclick="checkAnswer(${i})">${opt}</button>`
+  ).join('<br>');
+
+  document.getElementById('output').innerHTML = `
+    <h3>📘 Q${currentQuestionIndex + 1}: ${mcq.question}</h3>
+    ${optionsHTML}
+  `;
+}
+
+function checkAnswer(selectedIndex) {
+  const mcq = mcqs[currentQuestionIndex];
+  if (selectedIndex === mcq.answer) {
+    score++;
+    addStep('✅ Correct!');
+  } else {
+    addStep(`❌ Incorrect. Correct answer: ${mcq.options[mcq.answer]}`);
+  }
+  currentQuestionIndex++;
+  setTimeout(() => generateMCQ(), 1000);
+}
+
+// Subjective Questions with Simple Keyword Checking
+const subjectiveQuestions = [
+  {
+    question: "A man sells a shirt for Rs. 480 and gains 20%. Find the cost price.",
+    expectedKeywords: ["cost", "price", "400"]
+  },
+  {
+    question: "The perimeter of a rectangle is 60 cm. If its length is 20 cm, find the breadth and area.",
+    expectedKeywords: ["breadth", "10", "area", "200"]
+  },
+  {
+    question: "A student scored 75%, 80%, and 85% in three tests. What is the average score?",
+    expectedKeywords: ["average", "score", "80"]
+  },
+  {
+    question: "If a cube has a surface area of 96 cm², what is the length of its edge?",
+    expectedKeywords: ["edge", "4"]
+  },
+  {
+    question: "A man is 4 times as old as his son. In 10 years, he will be twice as old. Find their ages.",
+    expectedKeywords: ["man", "son", "40", "10"]
+  },
+  {
+    question: "Find the area of a trapezium with parallel sides 8 cm and 5 cm, and height 4 cm.",
+    expectedKeywords: ["area", "trapezium", "26"]
+  }
+];
+
+let currentSubjectiveIndex = 0;
+
+function generateSubjective() {
+  clearOutput();
+  if (currentSubjectiveIndex >= subjectiveQuestions.length) {
+    addStep(`✅ Subjective Quiz completed. Final Score: ${score}/${totalQuestions}`);
+    return;
+  }
+
+  const subj = subjectiveQuestions[currentSubjectiveIndex];
+  totalQuestions++;
+
+  document.getElementById('output').innerHTML = `
+    <h3>📝 Q${currentSubjectiveIndex + 1}: ${subj.question}</h3>
+    <textarea id="userAnswer" rows="4" cols="50" placeholder="Type your answer here..."></textarea><br>
+    <button onclick="checkSubjectiveAnswer()">Submit Answer</button>
+  `;
+}
+
+function checkSubjectiveAnswer() {
+  const userAnswer = document.getElementById('userAnswer').value.toLowerCase();
+  const subj = subjectiveQuestions[currentSubjectiveIndex];
+  const matched = subj.expectedKeywords.every(k => userAnswer.includes(k));
+  if (matched) {
+    score++;
+    addStep('✅ Well done! Your answer seems correct.');
+  } else {
+    addStep('❌ Your answer seems incorrect. Please check your approach.');
+  }
+  currentSubjectiveIndex++;
+  setTimeout(() => generateSubjective(), 1500);
+}
+
+// Include in dropdown
+// <option value="mcq">MCQ Quiz</option>
+// <option value="subjective">Subjective Word Problems</option>
+
+
 }
 </script>
 </body>
