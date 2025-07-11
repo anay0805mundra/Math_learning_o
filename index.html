@@ -25,36 +25,38 @@
   <h2>🧠 Math Learning-o</h2>
 
   <!-- User Input Area -->
-  <label for="topic">Choose Topic:</label>
-  <select id="topic">
-    <option value="mcq">MCQ Quiz</option>
-    <option value="subjective">Subjective Word Problems</option>
-    <option value="perimeter">Perimeter</option>
-    <option value="geometry">Geometry</option>
-    <option value="volume-surface-area">Volume & Surface Area</option>
-    <option value="rational">Rational Numbers</option>
-    <option value="integers">Integers</option>
-     <option value="linear-equations">Linear Equations</option>
-    <option value="simple-interest">Simple Interest</option>
-    <option value="compound-interest">Compound Interest</option>
-    <option value="factorisation">Factorisation</option>
-    <option value="algebraic-expressions">Algebraic Expressions</option>
-    <option value="polynomials">Polynomials</option>
-    <option value="probability">Probability</option>
-    <option value="fractions">Fractions</option>
-    <option value="decimals">Decimals</option>
-    <option value="exponents">Exponents</option>
-    <option value="area">Area</option>
-    <option value="percentage">Percentage</option>
-    <option value="inequalities">Inequalities</option>
-    <option value="squares-cubes-roots">Squares Cubes Roots</option>
-  </select><br/>
+  <h3>📚 Choose Topic:</h3>
+<select id="topic" onchange="toggleQuestionInput()">
+  <option value="geometry">Geometry</option>
+  <option value="volume">Volume & Surface Area</option>
+  <option value="perimeter">Perimeter</option>
+  <option value="rational">Rational Numbers</option>
+  <option value="integers">Integers</option>
+  <option value="simpleInterest">Simple Interest</option>
+  <option value="compoundInterest">Compound Interest</option>
+  <option value="factorisation">Factorisation</option>
+  <option value="algebra">Algebraic Expressions</option>
+  <option value="polynomials">Polynomials</option>
+  <option value="probability">Probability</option>
+  <option value="fractions">Fractions</option>
+  <option value="decimals">Decimals</option>
+  <option value="exponents">Exponents</option>
+  <option value="area">Area</option>
+  <option value="percentage">Percentage</option>
+  <option value="inequalities">Inequalities</option>
+  <option value="squaresCubesRoots">Squares, Cubes & Roots</option>
+  <option value="mcq">MCQ Quiz</option>
+  <option value="subjective">Subjective Word Problems</option>
+  <option value="linear">Linear Equations</option>
+</select>
 
-  <label for="question">Your Question / Click "Start" for quiz:</label><br/>
-  <input type="text" id="question" placeholder="e.g., Perimeter of rectangle 8 and 5"/><br/>
+<div id="questionSection">
+  <h3>Your Question:</h3>
+  <input type="text" id="question" placeholder="e.g., Perimeter of rectangle 8 and 5" />
+</div>
 
-  <button onclick="handleInput()">Submit / Start</button>
-  <div id="output"></div>
+<button id="submitBtn" onclick="handleInput()">Submit</button>
+
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.js"></script>
   <script>
@@ -644,6 +646,22 @@ function checkSubjectiveAnswer() {
 <canvas id="imageCanvas" style="display:none;"></canvas>
 <p id="imageResult"></p>
 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+ function toggleQuestionInput() {
+  const topic = document.getElementById('topic').value;
+  const questionSection = document.getElementById('questionSection');
+  const submitBtn = document.getElementById('submitBtn');
+
+  if (topic === 'mcq' || topic === 'subjective') {
+    questionSection.style.display = 'none';
+    submitBtn.innerText = 'Start Quiz';
+  } else {
+    questionSection.style.display = 'block';
+    submitBtn.innerText = 'Submit';
+  }
+}
+
+// Run on load
+document.addEventListener("DOMContentLoaded", toggleQuestionInput);
+ <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
 </body>
 </html>
