@@ -629,25 +629,21 @@ function checkSubjectiveAnswer() {
   currentSubjectiveIndex++;
   setTimeout(() => generateSubjective(), 1500);
 }
-<h3>🎤 Voice Input</h3>
-<button onclick="startVoiceInput()">Start Speaking</button>
-<p id="voiceResult"></p>
-
-    <h3>📸 Image Input</h3>
-<input type="file" accept="image/*" onchange="handleImage(event)">
-<canvas id="imageCanvas" style="display:none;"></canvas>
-<p id="imageResult"></p>
-
-    <h3>🔐 Login</h3>
+<h3>🔐 Login</h3>
 <input type="text" id="username" placeholder="Enter your name" />
 <input type="email" id="email" placeholder="Enter your email" />
 <button onclick="saveUser()">Login</button>
 <p id="authMessage"></p>
 
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <h3>🎤 Voice Input</h3>
+<button onclick="startVoiceInput()">Start Speaking</button>
+<p id="voiceResult"></p>
 
-<script>
-<html>
-<body>
+  <h3>📸 Image Input</h3>
+<input type="file" accept="image/*" onchange="handleImage(event)">
+<canvas id="imageCanvas" style="display:none;"></canvas>
+<p id="imageResult"></p>
 
-  
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+</body>
+</html>
